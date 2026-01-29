@@ -2,12 +2,37 @@
 # Add different payloads as scriptblocks here
 
 # Arduino CLI check payload
-$Payload_ArduinoCLI = {
+$Payload_VerifyArduinoCLI = {
     $path = Get-Command arduino-cli -ErrorAction SilentlyContinue
     if ($path) {
         [PSCustomObject]@{ Check = "Installed at: $($path.Source)" }
     } else {
         [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
+$Payload_DeployArduinoCLI = {
+    $chocoExe = "C:\ProgramData\chocolatey\bin\choco.exe"
+    
+    # 1. Check if Chocolatey exists
+    if (-not (Test-Path $chocoExe)) {
+        return [PSCustomObject]@{ Check = "FAILED: Chocolatey not found" }
+    }
+
+    try {
+        # 2. Run the installation
+        # -y: auto-confirm, --no-progress: cleaner logs for remote sessions
+        & $chocoExe install arduino-cli -y --no-progress | Out-Null
+        
+        # 3. Verify the installation after the command
+        $verify = Get-Command arduino-cli -ErrorAction SilentlyContinue
+        if ($verify) {
+            return [PSCustomObject]@{ Check = "SUCCESS: Installed at $($verify.Source)" }
+        } else {
+            return [PSCustomObject]@{ Check = "FAILED: Command finished but executable not found in PATH" }
+        }
+    } catch {
+        return [PSCustomObject]@{ Check = "ERROR: $($_.Exception.Message)" }
     }
 }
 
@@ -50,6 +75,32 @@ $Payload_InstalledPrograms = {
         Where-Object { $_.DisplayName } |
         Select-Object DisplayName, DisplayVersion, Publisher |
         Sort-Object DisplayName
+}
+
+# Verify PICO/RP2040 core installation
+$Payload_VerifyPicoCore = {
+    try {
+        # First check if arduino-cli is available
+        $arduinoCli = Get-Command arduino-cli -ErrorAction SilentlyContinue
+        if (-not $arduinoCli) {
+            return [PSCustomObject]@{ Check = "FAILED: arduino-cli not installed" }
+        }
+
+        # Get the core list
+        $coreList = & arduino-cli core list 2>&1
+        $coreListString = $coreList | Out-String
+
+        if ($coreListString -match "rp2040:rp2040") {
+            # Extract version if possible
+            $versionMatch = $coreListString -match "rp2040:rp2040\s+(\S+)"
+            $version = if ($Matches -and $Matches[1]) { $Matches[1] } else { "unknown" }
+            return [PSCustomObject]@{ Check = "OK: RP2040 core installed (v$version)" }
+        } else {
+            return [PSCustomObject]@{ Check = "NOT INSTALLED: RP2040 core not found" }
+        }
+    } catch {
+        return [PSCustomObject]@{ Check = "ERROR: $($_.Exception.Message)" }
+    }
 }
 
 # Install Chocolatey
