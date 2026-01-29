@@ -126,17 +126,23 @@ $report = foreach ($entry in $TargetComputers.GetEnumerator()) {
     }
 }
 
-# Output the report
+# Output the report - RAW format for ZERO truncation
 Write-Host "`n========================================" -ForegroundColor Green
-Write-Host "Results:" -ForegroundColor Green
+Write-Host "COMPLETE Results:" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 
-$report | Sort-Object LabID | Format-Table -AutoSize
+foreach ($entry in ($report | Sort-Object LabID)) {
+    Write-Host "`n$($entry.LabID.PadRight(12)) | $($entry.Hostname.PadRight(15)) |" -NoNewline -ForegroundColor Cyan
+    Write-Host $entry.Status -ForegroundColor White
+}
 
 # Summary
 $online = ($report | Where-Object { $_.Status -ne "OFFLINE / UNREACHABLE" }).Count
 $offline = ($report | Where-Object { $_.Status -eq "OFFLINE / UNREACHABLE" }).Count
 
-Write-Host "`nSummary:" -ForegroundColor Cyan
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "Summary:" -ForegroundColor Cyan
 Write-Host "  Online/Responded: $online" -ForegroundColor Green
 Write-Host "  Offline/Unreachable: $offline" -ForegroundColor Red
+Write-Host "========================================" -ForegroundColor Cyan
+

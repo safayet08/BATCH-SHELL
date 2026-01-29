@@ -139,34 +139,43 @@ $Payload_CheckArduinoIDE = {
 $Payload_CheckLabtestFiles = {
     $basePath = "C:\ProgramData\LabtestLogs"
     $mitmPath = "$basePath\mitmproxy"
-    
+
     $filesToCheck = @(
         "$basePath\proxy-logic.py",
         "$basePath\proxy-toggler.ps1"
     )
-    
+
     # Add mitmproxy directory files if it exists
     if (Test-Path $mitmPath) {
         $filesToCheck += Get-ChildItem -Path $mitmPath -File | ForEach-Object { $_.FullName }
     }
-    
+
     $results = foreach ($filePath in $filesToCheck) {
         $fileName = Split-Path $filePath -Leaf
         if (Test-Path $filePath) {
             $file = Get-Item $filePath
             [PSCustomObject]@{
-                File = $fileName
+                File          = $fileName
                 LastWriteTime = $file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
-                Size = $file.Length
+                Size          = $file.Length
             }
-        } else {
+        }
+        else {
             [PSCustomObject]@{
-                File = $fileName
+                File          = $fileName
                 LastWriteTime = "MISSING"
-                Size = 0
+                Size          = 0
             }
         }
     }
-    
-    $results
+
+    # Compact single-line summary: File:timestamp(size); File:timestamp(size)
+    $summaryLines = $results | ForEach-Object { 
+        "$($_.File):$($_.LastWriteTime)($($_.Size)B)"
+    }
+    $summary = ($summaryLines -join '; ') -replace 'MISSING\(0B\)', 'MISSING'
+
+    [PSCustomObject]@{
+        Check = $summary
+    }
 }
