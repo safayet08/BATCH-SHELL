@@ -179,3 +179,30 @@ $Payload_CheckLabtestFiles = {
         Check = $summary
     }
 }
+
+
+# Check Docker Desktop installation and version
+$Payload_CheckDockerDesktop = {
+    $dockerPath = "C:\Program Files\Docker\Docker Desktop.exe"
+    
+    if (Test-Path $dockerPath) {
+        $file = Get-Item $dockerPath
+        $version = $file.VersionInfo.ProductVersion
+        
+        # Try to get running Docker version if possible
+        $dockerVersion = & docker --version 2>$null
+        if ($dockerVersion) {
+            $dockerVersion = $dockerVersion.Trim()
+        } else {
+            $dockerVersion = "File detected, docker CLI not in PATH"
+        }
+        
+        [PSCustomObject]@{
+            Check = "INSTALLED - File: v$version | CLI: $dockerVersion"
+        }
+    } else {
+        [PSCustomObject]@{
+            Check = "NOT INSTALLED"
+        }
+    }
+}

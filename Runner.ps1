@@ -12,7 +12,7 @@ param(
     [string[]]$Target,
     
     [Parameter(Mandatory=$false)]
-    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles")]
+    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop")]
     [string]$PayloadName = "ArduinoCLI",
     
     [Parameter(Mandatory=$false)]
@@ -39,6 +39,7 @@ $Payload = switch ($PayloadName) {
     "CheckPyCharm"         { $Payload_CheckPyCharm }
     "CheckArduinoIDE"      { $Payload_CheckArduinoIDE }
     "CheckLabtestFiles"    { $Payload_CheckLabtestFiles }
+    "CheckDockerDesktop"   { $Payload_CheckDockerDesktop }
     default                { $Payload_ArduinoCLI }
 }
 
