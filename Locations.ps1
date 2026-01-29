@@ -16,7 +16,7 @@ $MKH4000 = @{
     "MKH-4000-15" = "MKH-L-33XGN34"
     "MKH-4000-16" = "MKH-W-HTVJN34"
     "MKH-4000-17" = "MKH-W-F0XGN34"
-    "MKH-4000-18" = "MKH-W-81XGN34"
+    "MKH-4000-18" = "MKH-W-HTVJN34"
     "MKH-4000-19" = "MKH-W-J1XGN34"
     "MKH-4000-20" = "MKH-W-B2XGN34"
     "MKH-4000-21" = "MKH-W-23XGN34"
@@ -249,4 +249,44 @@ function Get-RoomComputers {
     }
     
     return $combined
+}
+
+# Helper function to get specific computers by LabID
+# Accepts LabIDs like "MKH-4025-04", "MKH-4010-01", etc.
+function Get-SpecificComputers {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string[]]$ComputerIds
+    )
+    
+    $result = @{}
+    
+    foreach ($compId in $ComputerIds) {
+        $found = $false
+        
+        # Search through all locations for the computer
+        foreach ($roomName in $AllLocations.Keys) {
+            $room = $AllLocations[$roomName]
+            if ($room.ContainsKey($compId)) {
+                $result[$compId] = $room[$compId]
+                $found = $true
+                break
+            }
+        }
+        
+        if (-not $found) {
+            Write-Warning "Computer '$compId' not found in any room"
+        }
+    }
+    
+    return $result
+}
+
+# Helper function to get all available LabIDs (for validation/autocomplete)
+function Get-AllLabIds {
+    $allIds = @()
+    foreach ($roomName in $AllLocations.Keys) {
+        $allIds += $AllLocations[$roomName].Keys
+    }
+    return $allIds | Sort-Object
 }

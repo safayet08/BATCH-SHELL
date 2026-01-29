@@ -1,15 +1,13 @@
 # Runner.ps1 - Main script to execute payloads on target locations
-# Usage: 
-#   .\Runner.ps1 -TargetRooms "MKH4000","MKH4005" -PayloadName "ArduinoCLI"
-#   .\Runner.ps1 -Target "MKH-4010-06" -PayloadName "DiskSpace"
-#   .\Runner.ps1 -Target "MKH-4010-06","MKH-4010-07" -PayloadName "SystemInfo"
+# Usage: .\Runner.ps1 -TargetRooms "MKH4000","MKH4005" -PayloadName "VerifyArduinoCLI"
+# Usage: .\Runner.ps1 -TargetComputers "MKH-4025-04","MKH-4010-01" -PayloadName "SystemInfo"
 
 param(
     [Parameter(Mandatory=$false)]
     [string[]]$TargetRooms,
     
     [Parameter(Mandatory=$false)]
-    [string[]]$Target,
+    [string[]]$TargetComputers,
     
     [Parameter(Mandatory=$false)]
     [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop")]
@@ -28,10 +26,12 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Select the payload based on parameter
 $Payload = switch ($PayloadName) {
-    "ArduinoCLI"           { $Payload_ArduinoCLI }
     "SystemInfo"           { $Payload_SystemInfo }
     "DiskSpace"            { $Payload_DiskSpace }
     "InstalledPrograms"    { $Payload_InstalledPrograms }
+    "VerifyArduinoCLI"     { $Payload_VerifyArduinoCLI }
+    "DeployArduinoCLI"     { $Payload_DeployArduinoCLI }
+    "VerifyPicoCore"       { $Payload_VerifyPicoCore }
     "InstallChocolatey"    { $Payload_InstallChocolatey }
     "CheckChocolatey"      { $Payload_CheckChocolatey }
     "CheckFaronicsInsight" { $Payload_CheckFaronicsInsight }
@@ -43,52 +43,36 @@ $Payload = switch ($PayloadName) {
     default                { $Payload_ArduinoCLI }
 }
 
-# Build the combined list of all locations for lookups
-$AllRooms = Get-RoomComputers -Rooms @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025")
-
-# Determine target computers based on parameters
-$TargetComputers = @{}
-
-if ($Target) {
-    # Target specific computers by Lab ID (e.g., "MKH-4010-06") or hostname
-    foreach ($t in $Target) {
-        if ($AllRooms.ContainsKey($t)) {
-            # It's a Lab ID
-            $TargetComputers[$t] = $AllRooms[$t]
-        } elseif ($AllRooms.Values -contains $t) {
-            # It's a hostname - find the Lab ID
-            $labId = ($AllRooms.GetEnumerator() | Where-Object { $_.Value -eq $t }).Key
-            $TargetComputers[$labId] = $t
-        } else {
-            Write-Warning "Target '$t' not found in locations"
-        }
-    }
-    $targetDescription = "Specific: $($Target -join ', ')"
-} elseif ($TargetRooms) {
-    # Target by rooms
-    $TargetComputers = Get-RoomComputers -Rooms $TargetRooms -Domain $Domain
-    $targetDescription = "Rooms: $($TargetRooms -join ', ')"
+# Determine target mode and get computers
+if ($TargetComputers -and $TargetComputers.Count -gt 0) {
+    # Mode: Specific computers by LabID
+    $TargetMode = "Computers"
+    $ComputerHashtable = Get-SpecificComputers -ComputerIds $TargetComputers
+    $TargetDisplay = $TargetComputers -join ', '
+} elseif ($TargetRooms -and $TargetRooms.Count -gt 0) {
+    # Mode: All computers in specified rooms
+    $TargetMode = "Rooms"
+    $ComputerHashtable = Get-RoomComputers -Rooms $TargetRooms -Domain $Domain
+    $TargetDisplay = $TargetRooms -join ', '
 } else {
-    # Default: all rooms
-    $TargetComputers = $AllRooms
-    $targetDescription = "All Rooms"
-}
-
-if ($TargetComputers.Count -eq 0) {
-    Write-Host "No valid targets specified. Exiting." -ForegroundColor Red
-    return
+    # Default: All rooms
+    $TargetMode = "Rooms"
+    $TargetRooms = @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025")
+    $ComputerHashtable = Get-RoomComputers -Rooms $TargetRooms -Domain $Domain
+    $TargetDisplay = $TargetRooms -join ', '
 }
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Remote Execution Runner" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Target: $targetDescription" -ForegroundColor Yellow
+Write-Host "Target Mode: $TargetMode" -ForegroundColor Yellow
+Write-Host "Targets: $TargetDisplay" -ForegroundColor Yellow
 Write-Host "Payload: $PayloadName" -ForegroundColor Yellow
-Write-Host "Total Computers: $($TargetComputers.Count)" -ForegroundColor Yellow
+Write-Host "Total Computers: $($ComputerHashtable.Count)" -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Cyan
 
 # Build the FQDN list (filter out empty values)
-$computerList = $TargetComputers.Values | 
+$computerList = $ComputerHashtable.Values | 
     Where-Object { $_ -ne "" } | 
     ForEach-Object { "$_.$Domain" }
 
@@ -105,7 +89,7 @@ if ($null -eq $myCred) {
 $results = Invoke-Command -ComputerName $computerList -ScriptBlock $Payload -Credential $myCred -ErrorAction SilentlyContinue
 
 # Create the report mapping Lab IDs back to Hostnames
-$report = foreach ($entry in $TargetComputers.GetEnumerator()) {
+$report = foreach ($entry in $ComputerHashtable.GetEnumerator()) {
     $labId = $entry.Key
     $hostname = "$($entry.Value).$Domain"
     
