@@ -111,14 +111,17 @@ $report = foreach ($entry in $ComputerHashtable.GetEnumerator()) {
     }
 }
 
-# Output the report - RAW format for ZERO truncation
+
 Write-Host "`n========================================" -ForegroundColor Green
-Write-Host "COMPLETE Results:" -ForegroundColor Green
+Write-Host "Results:" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 
+$first = $true
 foreach ($entry in ($report | Sort-Object LabID)) {
-    Write-Host "`n$($entry.LabID.PadRight(12)) | $($entry.Hostname.PadRight(15)) |" -NoNewline -ForegroundColor Cyan
-    Write-Host $entry.Status -ForegroundColor White
+    if (-not $first) { Write-Host "" }  # Single blank line between entries only
+    $first = $false
+    Write-Host "$($entry.LabID.PadRight(12)) | $($entry.Hostname.PadRight(15)) |" -NoNewline -ForegroundColor Cyan
+    Write-Host $entry.Status -NoNewline -ForegroundColor White
 }
 
 # Summary
