@@ -1,9 +1,15 @@
 # Runner.ps1 - Main script to execute payloads on target locations
-# Usage: .\Runner.ps1 -TargetRooms "MKH4000","MKH4005" -PayloadName "ArduinoCLI"
+# Usage: 
+#   .\Runner.ps1 -TargetRooms "MKH4000","MKH4005" -PayloadName "ArduinoCLI"
+#   .\Runner.ps1 -Target "MKH-4010-06" -PayloadName "DiskSpace"
+#   .\Runner.ps1 -Target "MKH-4010-06","MKH-4010-07" -PayloadName "SystemInfo"
 
 param(
     [Parameter(Mandatory=$false)]
-    [string[]]$TargetRooms = @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025"),
+    [string[]]$TargetRooms,
+    
+    [Parameter(Mandatory=$false)]
+    [string[]]$Target,
     
     [Parameter(Mandatory=$false)]
     [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms")]
@@ -29,13 +35,46 @@ $Payload = switch ($PayloadName) {
     default             { $Payload_ArduinoCLI }
 }
 
-# Get target computers from selected rooms
-$TargetComputers = Get-RoomComputers -Rooms $TargetRooms -Domain $Domain
+# Build the combined list of all locations for lookups
+$AllRooms = Get-RoomComputers -Rooms @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025")
+
+# Determine target computers based on parameters
+$TargetComputers = @{}
+
+if ($Target) {
+    # Target specific computers by Lab ID (e.g., "MKH-4010-06") or hostname
+    foreach ($t in $Target) {
+        if ($AllRooms.ContainsKey($t)) {
+            # It's a Lab ID
+            $TargetComputers[$t] = $AllRooms[$t]
+        } elseif ($AllRooms.Values -contains $t) {
+            # It's a hostname - find the Lab ID
+            $labId = ($AllRooms.GetEnumerator() | Where-Object { $_.Value -eq $t }).Key
+            $TargetComputers[$labId] = $t
+        } else {
+            Write-Warning "Target '$t' not found in locations"
+        }
+    }
+    $targetDescription = "Specific: $($Target -join ', ')"
+} elseif ($TargetRooms) {
+    # Target by rooms
+    $TargetComputers = Get-RoomComputers -Rooms $TargetRooms -Domain $Domain
+    $targetDescription = "Rooms: $($TargetRooms -join ', ')"
+} else {
+    # Default: all rooms
+    $TargetComputers = $AllRooms
+    $targetDescription = "All Rooms"
+}
+
+if ($TargetComputers.Count -eq 0) {
+    Write-Host "No valid targets specified. Exiting." -ForegroundColor Red
+    return
+}
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Remote Execution Runner" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Target Rooms: $($TargetRooms -join ', ')" -ForegroundColor Yellow
+Write-Host "Target: $targetDescription" -ForegroundColor Yellow
 Write-Host "Payload: $PayloadName" -ForegroundColor Yellow
 Write-Host "Total Computers: $($TargetComputers.Count)" -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Cyan
