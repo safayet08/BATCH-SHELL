@@ -190,34 +190,70 @@ $Payload_CheckArduinoIDE = {
 $Payload_CheckLabtestFiles = {
     $basePath = "C:\ProgramData\LabtestLogs"
     $mitmPath = "$basePath\mitmproxy"
-    
+
     $filesToCheck = @(
         "$basePath\proxy-logic.py",
         "$basePath\proxy-toggler.ps1"
     )
-    
+
     # Add mitmproxy directory files if it exists
     if (Test-Path $mitmPath) {
         $filesToCheck += Get-ChildItem -Path $mitmPath -File | ForEach-Object { $_.FullName }
     }
-    
+
     $results = foreach ($filePath in $filesToCheck) {
         $fileName = Split-Path $filePath -Leaf
         if (Test-Path $filePath) {
             $file = Get-Item $filePath
             [PSCustomObject]@{
-                File = $fileName
+                File          = $fileName
                 LastWriteTime = $file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
-                Size = $file.Length
+                Size          = $file.Length
             }
-        } else {
+        }
+        else {
             [PSCustomObject]@{
-                File = $fileName
+                File          = $fileName
                 LastWriteTime = "MISSING"
-                Size = 0
+                Size          = 0
             }
         }
     }
+
+    # Compact single-line summary: File:timestamp(size); File:timestamp(size)
+    $summaryLines = $results | ForEach-Object { 
+        "$($_.File):$($_.LastWriteTime)($($_.Size)B)"
+    }
+    $summary = ($summaryLines -join '; ') -replace 'MISSING\(0B\)', 'MISSING'
+
+    [PSCustomObject]@{
+        Check = $summary
+    }
+}
+
+
+# Check Docker Desktop installation and version
+$Payload_CheckDockerDesktop = {
+    $dockerPath = "C:\Program Files\Docker\Docker Desktop.exe"
     
-    $results
+    if (Test-Path $dockerPath) {
+        $file = Get-Item $dockerPath
+        $version = $file.VersionInfo.ProductVersion
+        
+        # Try to get running Docker version if possible
+        $dockerVersion = & docker --version 2>$null
+        if ($dockerVersion) {
+            $dockerVersion = $dockerVersion.Trim()
+        } else {
+            $dockerVersion = "File detected, docker CLI not in PATH"
+        }
+        
+        [PSCustomObject]@{
+            Check = "INSTALLED - File: v$version | CLI: $dockerVersion"
+        }
+    } else {
+        [PSCustomObject]@{
+            Check = "NOT INSTALLED"
+        }
+    }
 }
