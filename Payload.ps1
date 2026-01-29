@@ -51,3 +51,122 @@ $Payload_InstalledPrograms = {
         Select-Object DisplayName, DisplayVersion, Publisher |
         Sort-Object DisplayName
 }
+
+# Install Chocolatey
+$Payload_InstallChocolatey = {
+    # Check if Chocolatey is already installed
+    $chocoPath = Get-Command choco -ErrorAction SilentlyContinue
+    if ($chocoPath) {
+        $version = & choco --version 2>$null
+        [PSCustomObject]@{ Check = "Already installed: v$version" }
+    } else {
+        try {
+            # Set execution policy and install Chocolatey
+            Set-ExecutionPolicy Bypass -Scope Process -Force
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+            
+            # Refresh environment and verify
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            $version = & choco --version 2>$null
+            if ($version) {
+                [PSCustomObject]@{ Check = "SUCCESS: Installed v$version" }
+            } else {
+                [PSCustomObject]@{ Check = "INSTALLED (restart shell to verify)" }
+            }
+        } catch {
+            [PSCustomObject]@{ Check = "FAILED: $($_.Exception.Message)" }
+        }
+    }
+}
+
+# Check if Chocolatey is installed (without installing)
+$Payload_CheckChocolatey = {
+    $chocoPath = Get-Command choco -ErrorAction SilentlyContinue
+    if ($chocoPath) {
+        $version = & choco --version 2>$null
+        [PSCustomObject]@{ Check = "Installed: v$version at $($chocoPath.Source)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
+# Check if Faronics Insight Student is installed
+$Payload_CheckFaronicsInsight = {
+    $insightPath = "C:\Program Files\Faronics\Insight Student\FIStudentUI.exe"
+    if (Test-Path $insightPath) {
+        $file = Get-Item $insightPath
+        [PSCustomObject]@{ Check = "INSTALLED - Version: $($file.VersionInfo.FileVersion)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
+# Check if IntelliJ IDEA is installed
+$Payload_CheckIntelliJ = {
+    $ideaPath = "C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2025.2.5\bin\idea64.exe"
+    if (Test-Path $ideaPath) {
+        $file = Get-Item $ideaPath
+        [PSCustomObject]@{ Check = "INSTALLED - Version: $($file.VersionInfo.ProductVersion)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
+# Check if PyCharm is installed
+$Payload_CheckPyCharm = {
+    $pycharmPath = "C:\Program Files\JetBrains\PyCharm Community Edition 2025.2.5\bin\pycharm64.exe"
+    if (Test-Path $pycharmPath) {
+        $file = Get-Item $pycharmPath
+        [PSCustomObject]@{ Check = "INSTALLED - Version: $($file.VersionInfo.ProductVersion)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
+# Check if Arduino IDE is installed
+$Payload_CheckArduinoIDE = {
+    $arduinoPath = "C:\Program Files\arduino-ide\Arduino IDE.exe"
+    if (Test-Path $arduinoPath) {
+        $file = Get-Item $arduinoPath
+        [PSCustomObject]@{ Check = "INSTALLED - Version: $($file.VersionInfo.ProductVersion)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
+# Check Labtest/Exam system files timestamps (GPO sync verification)
+$Payload_CheckLabtestFiles = {
+    $basePath = "C:\ProgramData\LabtestLogs"
+    $mitmPath = "$basePath\mitmproxy"
+    
+    $filesToCheck = @(
+        "$basePath\proxy-logic.py",
+        "$basePath\proxy-toggler.ps1"
+    )
+    
+    # Add mitmproxy directory files if it exists
+    if (Test-Path $mitmPath) {
+        $filesToCheck += Get-ChildItem -Path $mitmPath -File | ForEach-Object { $_.FullName }
+    }
+    
+    $results = foreach ($filePath in $filesToCheck) {
+        $fileName = Split-Path $filePath -Leaf
+        if (Test-Path $filePath) {
+            $file = Get-Item $filePath
+            [PSCustomObject]@{
+                File = $fileName
+                LastWriteTime = $file.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
+                Size = $file.Length
+            }
+        } else {
+            [PSCustomObject]@{
+                File = $fileName
+                LastWriteTime = "MISSING"
+                Size = 0
+            }
+        }
+    }
+    
+    $results
+}

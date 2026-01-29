@@ -12,7 +12,7 @@ param(
     [string[]]$Target,
     
     [Parameter(Mandatory=$false)]
-    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms")]
+    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles")]
     [string]$PayloadName = "ArduinoCLI",
     
     [Parameter(Mandatory=$false)]
@@ -28,11 +28,18 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Select the payload based on parameter
 $Payload = switch ($PayloadName) {
-    "ArduinoCLI"        { $Payload_ArduinoCLI }
-    "SystemInfo"        { $Payload_SystemInfo }
-    "DiskSpace"         { $Payload_DiskSpace }
-    "InstalledPrograms" { $Payload_InstalledPrograms }
-    default             { $Payload_ArduinoCLI }
+    "ArduinoCLI"           { $Payload_ArduinoCLI }
+    "SystemInfo"           { $Payload_SystemInfo }
+    "DiskSpace"            { $Payload_DiskSpace }
+    "InstalledPrograms"    { $Payload_InstalledPrograms }
+    "InstallChocolatey"    { $Payload_InstallChocolatey }
+    "CheckChocolatey"      { $Payload_CheckChocolatey }
+    "CheckFaronicsInsight" { $Payload_CheckFaronicsInsight }
+    "CheckIntelliJ"        { $Payload_CheckIntelliJ }
+    "CheckPyCharm"         { $Payload_CheckPyCharm }
+    "CheckArduinoIDE"      { $Payload_CheckArduinoIDE }
+    "CheckLabtestFiles"    { $Payload_CheckLabtestFiles }
+    default                { $Payload_ArduinoCLI }
 }
 
 # Build the combined list of all locations for lookups
