@@ -10,7 +10,7 @@ param(
     [string[]]$TargetComputers,
     
     [Parameter(Mandatory=$false)]
-    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop")]
+    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop", "DeployPIPVenvDIGT2201", "DeployPIPVenvDIGT3131", "DeployPIPVenvDIGT3231")]
     [string]$PayloadName = "ArduinoCLI",
     
     [Parameter(Mandatory=$false)]
@@ -40,6 +40,9 @@ $Payload = switch ($PayloadName) {
     "CheckArduinoIDE"      { $Payload_CheckArduinoIDE }
     "CheckLabtestFiles"    { $Payload_CheckLabtestFiles }
     "CheckDockerDesktop"   { $Payload_CheckDockerDesktop }
+    "DeployPIPVenvDIGT2201" { $Payload_DeployDigt2201Venv }
+    "DeployPIPVenvDIGT3131" { $Payload_DeployDigt3131Venv }
+    "DeployPIPVenvDIGT3231" { $Payload_DeployDigt3231Venv }
     default                { $Payload_ArduinoCLI }
 }
 
