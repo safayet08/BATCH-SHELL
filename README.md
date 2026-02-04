@@ -43,6 +43,12 @@ Execute payloads on remote lab computers via PowerShell remoting.
 | `CheckPyCharm` | Check if PyCharm is installed |
 | `CheckArduinoIDE` | Check if Arduino IDE is installed |
 | `CheckLabtestFiles` | Check Labtest/Exam system files (GPO sync) |
+| `CheckDockerDesktop` | Check if Docker Desktop is installed |
+| `DeployPIPVenvDIGT2201` | Deploy Python venv for DIGT2201 course |
+| `DeployPIPVenvDIGT3131` | Deploy Python venv for DIGT3131 course |
+| `DeployPIPVenvDIGT3231` | Deploy Python venv for DIGT3231 course |
+| `GPUpdate` | Force Group Policy update (gpupdate /force) |
+| `RebootComputer` | Reboot the computer (10 second delay) |
 
 ## Available Rooms
 

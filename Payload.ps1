@@ -443,3 +443,33 @@ exit 0
         }
     }
 }
+
+# Force Group Policy update
+$Payload_GPUpdate = {
+    try {
+        $output = & gpupdate /force 2>&1
+        $success = $output | Select-String -Pattern "successfully" -Quiet
+        
+        if ($success) {
+            [PSCustomObject]@{ Check = "GPO UPDATE SUCCESS" }
+        } else {
+            [PSCustomObject]@{ Check = "GPO UPDATE COMPLETED: $($output[-1])" }
+        }
+    }
+    catch {
+        [PSCustomObject]@{ Check = "FAILED: $($_.Exception.Message)" }
+    }
+}
+
+# Reboot the computer
+$Payload_RebootComputer = {
+    try {
+        # Schedule reboot with delay to allow response to be sent back
+        & shutdown.exe /r /t 10 /f /c "Remote reboot initiated by admin script" 2>&1 | Out-Null
+        
+        [PSCustomObject]@{ Check = "REBOOTING in 10 seconds..." }
+    }
+    catch {
+        [PSCustomObject]@{ Check = "FAILED: $($_.Exception.Message)" }
+    }
+}
