@@ -62,7 +62,7 @@ if ($TargetComputers -and $TargetComputers.Count -gt 0) {
 } else {
     # Default: All rooms
     $TargetMode = "Rooms"
-    $TargetRooms = @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025")
+    $TargetRooms = @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025", "MKH2015")
     $ComputerHashtable = Get-RoomComputers -Rooms $TargetRooms -Domain $Domain
     $TargetDisplay = $TargetRooms -join ', '
 }

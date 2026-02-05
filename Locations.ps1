@@ -219,6 +219,26 @@ $MKH4025 = @{
     "MKH-4025-50" = "MKH-W-Z0081V2"
 }
 
+$MKH2015 = @{
+    "MKH-2015-A" = "MKH-L-Z0081RY"
+    "MKH-2015-B" = "MKH-L-Z0081S4"
+    "MKH-2015-C" = "MKH-L-Z0081QJ"
+    "MKH-2015-D" = "MKH-L-Z0081S7"
+    "MKH-2015-E" = "MKH-L-Z0081V1"
+    "MKH-2015-F" = "MKH-L-Z0081QH"
+    "MKH-2015-K" = "MKH-L-Z0081QK"
+    "MKH-2015-M" = "MKH-L-Z0081VV"
+    "MKH-2015-N" = "MKH-L-MZ02E6LQ"
+    "MKH-2015-R" = "MKH-L-MZ02E6LL"
+    "MKH-2015-S" = "MKH-L-MZ02E6LK"
+    "MKH-2015-U" = "MKH-L-MZ02E6LR"
+    "MKH-2015-V" = "MKH-L-MZ02E6LJ"
+    "MKH-2015-W" = "MKH-L-MZ02E6LP"
+    "MKH-2015-X" = "MKH-L-MZ02E6LM"
+    "MKH-2015-Y" = "MKH-L-MZ02E6LN"
+}
+
+
 # Export all locations as a combined hashtable
 # Usage: . .\Locations.ps1 to dot-source and get $AllLocations
 $AllLocations = @{
@@ -227,13 +247,14 @@ $AllLocations = @{
     "MKH4010" = $MKH4010
     "MKH4015" = $MKH4015
     "MKH4025" = $MKH4025
+    "MKH2015" = $MKH2015
 }
 
 # Helper function to get computers for specific rooms
 function Get-RoomComputers {
     param(
         [Parameter(Mandatory=$false)]
-        [string[]]$Rooms = @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025"),
+        [string[]]$Rooms = @("MKH4000", "MKH4005", "MKH4010", "MKH4015", "MKH4025", "MKH2015"),
         
         [Parameter(Mandatory=$false)]
         [string]$Domain = "yorku.yorku.ca"
