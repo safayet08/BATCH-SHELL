@@ -54,12 +54,11 @@ $Payload_SystemInfo = {
         OS = (Get-CimInstance Win32_OperatingSystem).Caption
         RAM = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
         LastBoot = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
-        IP = try {
-            $fqdn = "$env:COMPUTERNAME.yorku.yorku.ca"
-            $result = nslookup $fqdn 2>$null | Where-Object { $_ -match '\d+\.\d+\.\d+\.\d+' } | Select-Object -First 1
-            if ($result) { $result.Trim() } else { 'DNS fail' }
-        } catch { 'nslookup error' }
-
+        IP = (
+            nslookup "$env:COMPUTERNAME.yorku.yorku.ca" 2>$null |
+            Select-String '\d+\.\d+\.\d+\.\d+' |
+            Select-Object -Last 1
+        ).Matches[0].Value
     }
 }
 
