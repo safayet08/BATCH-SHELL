@@ -10,7 +10,7 @@ param(
     [string[]]$TargetComputers,
     
     [Parameter(Mandatory=$false)]
-    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop", "DeployPIPVenvDIGT2201", "DeployPIPVenvDIGT3131", "DeployPIPVenvDIGT3231")]
+    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "VerifyArduinoCLI", "DeployArduinoCLI", "VerifyPicoCore", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop", "DeployPIPVenvDIGT2201", "DeployPIPVenvDIGT3131", "DeployPIPVenvDIGT3231", "RebootComputer", "GPUpdate")]
     [string]$PayloadName = "ArduinoCLI",
     
     [Parameter(Mandatory=$false)]
