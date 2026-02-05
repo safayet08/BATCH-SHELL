@@ -57,6 +57,7 @@ Execute payloads on remote lab computers via PowerShell remoting.
 - `MKH4010` - 48 computers
 - `MKH4015` - 28 computers
 - `MKH4025` - 50 computers
+- `MKH2015` - 25* computers
 
 ## Parameters
 
