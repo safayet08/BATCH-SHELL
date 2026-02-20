@@ -478,3 +478,58 @@ $Payload_RebootComputer = {
         [PSCustomObject]@{ Check = "FAILED: $($_.Exception.Message)" }
     }
 }
+
+# Download and install LibreOffice 26.2.0 (Win x86-64) [web:24]
+$Payload_InstallLibreOffice = {
+    $url = "https://download.documentfoundation.org/libreoffice/stable/26.2.0/win/x86_64/LibreOffice_26.2.0_Win_x86-64.msi"
+    $msiPath = Join-Path $env:TEMP "LibreOffice_26.2.0_Win_x86-64.msi"
+    $minSizeBytes = 300 * 1024 * 1024   # ~300 MB - full MSI is ~355 MB [web:32][web:33][web:36]
+
+    # Download [web:1][web:15]
+    [PSCustomObject]@{ Check = "Downloading LibreOffice 26.2.0..." } | Out-Null
+
+    $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+    try {
+        $ProgressPreference = 'SilentlyContinue'
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri $url -OutFile $msiPath -UseBasicParsing -UserAgent $ua -MaximumRedirection 10
+
+        if (-not (Test-Path $msiPath)) {
+            return [PSCustomObject]@{ Check = "FAILED: Download did not create file" }
+        }
+
+        $fileSize = (Get-Item $msiPath).Length
+        if ($fileSize -lt $minSizeBytes) {
+            Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
+            return [PSCustomObject]@{ Check = "FAILED: Download incomplete or corrupt (size $([math]::Round($fileSize/1MB,2)) MB, need ~355 MB)" }
+        }
+
+        # Silent install [web:35]
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "msiexec.exe"
+        $psi.Arguments = "/i `"$msiPath`" /quiet /norestart RebootYesNo=No"  # Added RebootYesNo=No for reliability [web:35]
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
+        $p = [System.Diagnostics.Process]::Start($psi)
+        $p.WaitForExit(600000)  # wait up to 10 minutes
+
+        $exitCode = $p.ExitCode
+        Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
+
+        if ($exitCode -eq 0) {
+            return [PSCustomObject]@{ Check = "SUCCESS: LibreOffice 26.2.0 installed" }
+        } elseif ($exitCode -eq 3010) {
+            return [PSCustomObject]@{ Check = "SUCCESS: Installed; reboot required" }
+        } elseif ($exitCode -eq 1620) {
+            return [PSCustomObject]@{ Check = "FAILED (1620): Installer could not open package - often corrupt/incomplete download or access denied" }
+        } else {
+            return [PSCustomObject]@{ Check = "FAILED: Install exit code $exitCode" }
+        }
+    }
+    catch {
+        Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
+        return [PSCustomObject]@{ Check = "FAILED: $($_.Exception.Message)" }
+    }
+}
+
