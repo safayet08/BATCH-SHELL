@@ -479,13 +479,13 @@ $Payload_RebootComputer = {
     }
 }
 
-# Download and install LibreOffice 26.2.0 (Win x86-64) [web:24]
+# Download and install LibreOffice 26.2.0 (Win x86-64)
 $Payload_InstallLibreOffice = {
     $url = "https://download.documentfoundation.org/libreoffice/stable/26.2.0/win/x86_64/LibreOffice_26.2.0_Win_x86-64.msi"
     $msiPath = Join-Path $env:TEMP "LibreOffice_26.2.0_Win_x86-64.msi"
-    $minSizeBytes = 300 * 1024 * 1024   # ~300 MB - full MSI is ~355 MB [web:32][web:33][web:36]
+    $minSizeBytes = 300 * 1024 * 1024   # ~300 MB - full MSI is ~355 MB
 
-    # Download [web:1][web:15]
+    # Download
     [PSCustomObject]@{ Check = "Downloading LibreOffice 26.2.0..." } | Out-Null
 
     $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
