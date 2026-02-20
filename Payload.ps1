@@ -523,6 +523,8 @@ $Payload_InstallLibreOffice = {
             return [PSCustomObject]@{ Check = "SUCCESS: Installed; reboot required" }
         } elseif ($exitCode -eq 1620) {
             return [PSCustomObject]@{ Check = "FAILED (1620): Installer could not open package - often corrupt/incomplete download or access denied" }
+        } elseif ($exitCode -eq 1638) {
+            return [PSCustomObject]@{ Check = "SUCCESS: LibreOffice already installed (msiexec exit 1638)" }
         } else {
             return [PSCustomObject]@{ Check = "FAILED: Install exit code $exitCode" }
         }
