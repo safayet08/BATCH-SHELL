@@ -512,8 +512,17 @@ $Payload_InstallLibreOffice = {
         $psi.UseShellExecute = $false
         $psi.CreateNoWindow = $true
         $p = [System.Diagnostics.Process]::Start($psi)
-        $p.WaitForExit(600000)  # wait up to 10 minutes
+        $completed = $p.WaitForExit(600000)  # wait up to 10 minutes
 
+        if (-not $completed) {
+            try {
+                $p.Kill()
+            } catch {
+                # Ignore errors when attempting to kill a hung installer
+            }
+            Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
+            return [PSCustomObject]@{ Check = "FAILED: Installer did not complete within 10 minutes (timed out)" }
+        }
         $exitCode = $p.ExitCode
         Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
 
