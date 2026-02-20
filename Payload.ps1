@@ -486,7 +486,6 @@ $Payload_InstallLibreOffice = {
     $minSizeBytes = 300 * 1024 * 1024   # ~300 MB - full MSI is ~355 MB
 
     # Download
-    [PSCustomObject]@{ Check = "Downloading LibreOffice 26.2.0..." } | Out-Null
 
     $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
