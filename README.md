@@ -44,6 +44,8 @@ Execute payloads on remote lab computers via PowerShell remoting.
 | `CheckArduinoIDE` | Check if Arduino IDE is installed |
 | `CheckLabtestFiles` | Check Labtest/Exam system files (GPO sync) |
 | `CheckDockerDesktop` | Check if Docker Desktop is installed |
+| `CheckPublicIP` | Get the public IP address of each computer |
+| `CheckPuTTY` | Check if PuTTY is installed |
 | `DeployPIPVenvDIGT2201` | Deploy Python venv for DIGT2201 course |
 | `DeployPIPVenvDIGT3131` | Deploy Python venv for DIGT3131 course |
 | `DeployPIPVenvDIGT3231` | Deploy Python venv for DIGT3231 course |

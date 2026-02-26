@@ -10,7 +10,7 @@ param(
     [string[]]$TargetComputers,
     
     [Parameter(Mandatory=$false)]
-    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "VerifyArduinoCLI", "DeployArduinoCLI", "VerifyPicoCore", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop", "DeployPIPVenvDIGT2201", "DeployPIPVenvDIGT3131", "DeployPIPVenvDIGT3231", "InstallLibreOffice", "RebootComputer", "GPUpdate")]
+    [ValidateSet("ArduinoCLI", "SystemInfo", "DiskSpace", "InstalledPrograms", "VerifyArduinoCLI", "DeployArduinoCLI", "VerifyPicoCore", "InstallChocolatey", "CheckChocolatey", "CheckFaronicsInsight", "CheckIntelliJ", "CheckPyCharm", "CheckArduinoIDE", "CheckLabtestFiles", "CheckDockerDesktop", "CheckPublicIP", "CheckPuTTY", "DeployPIPVenvDIGT2201", "DeployPIPVenvDIGT3131", "DeployPIPVenvDIGT3231", "InstallLibreOffice", "RebootComputer", "GPUpdate")]
     [string]$PayloadName = "ArduinoCLI",
     
     [Parameter(Mandatory=$false)]
@@ -40,6 +40,8 @@ $Payload = switch ($PayloadName) {
     "CheckArduinoIDE"      { $Payload_CheckArduinoIDE }
     "CheckLabtestFiles"    { $Payload_CheckLabtestFiles }
     "CheckDockerDesktop"   { $Payload_CheckDockerDesktop }
+    "CheckPublicIP"        { $Payload_CheckPublicIP }
+    "CheckPuTTY"           { $Payload_CheckPuTTY }
     "DeployPIPVenvDIGT2201" { $Payload_DeployDigt2201Venv }
     "DeployPIPVenvDIGT3131" { $Payload_DeployDigt3131Venv }
     "DeployPIPVenvDIGT3231" { $Payload_DeployDigt3231Venv }

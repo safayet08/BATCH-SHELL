@@ -479,6 +479,37 @@ $Payload_RebootComputer = {
     }
 }
 
+# Check Public IP address
+$Payload_CheckPublicIP = {
+    try {
+        $ip = (Invoke-RestMethod -Uri "https://api.ipify.org" -UseBasicParsing -TimeoutSec 10).Trim()
+        if ($ip -match '^\d{1,3}(\.\d{1,3}){3}$') {
+            [PSCustomObject]@{ Check = "Public IP: $ip" }
+        } else {
+            [PSCustomObject]@{ Check = "UNEXPECTED RESPONSE: $ip" }
+        }
+    }
+    catch {
+        [PSCustomObject]@{ Check = "FAILED: $($_.Exception.Message)" }
+    }
+}
+
+# Download and install LibreOffice 26.2.0 (Win x86-64)
+# Check if PuTTY is installed
+$Payload_CheckPuTTY = {
+    $puttyPath = "C:\Program Files\PuTTY\putty.exe"
+    $cmd = Get-Command putty -ErrorAction SilentlyContinue
+
+    if (Test-Path $puttyPath) {
+        $file = Get-Item $puttyPath
+        [PSCustomObject]@{ Check = "INSTALLED - Version: $($file.VersionInfo.ProductVersion) at $puttyPath" }
+    } elseif ($cmd) {
+        [PSCustomObject]@{ Check = "INSTALLED at: $($cmd.Source)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
 # Download and install LibreOffice 26.2.0 (Win x86-64)
 $Payload_InstallLibreOffice = {
     $url = "https://download.documentfoundation.org/libreoffice/stable/26.2.0/win/x86_64/LibreOffice_26.2.0_Win_x86-64.msi"
