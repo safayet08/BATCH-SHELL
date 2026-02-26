@@ -510,6 +510,21 @@ $Payload_CheckPuTTY = {
     }
 }
 
+# Check if Tera Term is installed
+$Payload_CheckTeraTerm = {
+    $teratermPath = "C:\Program Files (x86)\teraterm5\ttermpro.exe"
+    $cmd = Get-Command ttermpro -ErrorAction SilentlyContinue
+
+    if (Test-Path $teratermPath) {
+        $file = Get-Item $teratermPath
+        [PSCustomObject]@{ Check = "INSTALLED - Version: $($file.VersionInfo.ProductVersion) at $teratermPath" }
+    } elseif ($cmd) {
+        [PSCustomObject]@{ Check = "INSTALLED at: $($cmd.Source)" }
+    } else {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+    }
+}
+
 # Download and install LibreOffice 26.2.0 (Win x86-64)
 $Payload_InstallLibreOffice = {
     $url = "https://download.documentfoundation.org/libreoffice/stable/26.2.0/win/x86_64/LibreOffice_26.2.0_Win_x86-64.msi"
