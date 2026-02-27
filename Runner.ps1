@@ -43,6 +43,7 @@ $Payload = switch ($PayloadName) {
     "CheckPublicIP"        { $Payload_CheckPublicIP }
     "CheckPuTTY"           { $Payload_CheckPuTTY }
     "CheckTeraTerm"        { $Payload_CheckTeraTerm }
+    "CheckLibreOffice"     { $Payload_CheckLibreOffice }
     "DeployPIPVenvDIGT2201" { $Payload_DeployDigt2201Venv }
     "DeployPIPVenvDIGT3131" { $Payload_DeployDigt3131Venv }
     "DeployPIPVenvDIGT3231" { $Payload_DeployDigt3231Venv }

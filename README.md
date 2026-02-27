@@ -47,6 +47,8 @@ Execute payloads on remote lab computers via PowerShell remoting.
 | `CheckPublicIP` | Get the public IP address of each computer |
 | `CheckPuTTY` | Check if PuTTY is installed |
 | `CheckTeraTerm` | Check if Tera Term is installed |
+| `CheckLibreOffice` | Check if LibreOffice is installed |
+| `InstallLibreOffice` | Download and install LibreOffice 26.2.0 (Win x86-64) |
 | `DeployPIPVenvDIGT2201` | Deploy Python venv for DIGT2201 course |
 | `DeployPIPVenvDIGT3131` | Deploy Python venv for DIGT3131 course |
 | `DeployPIPVenvDIGT3231` | Deploy Python venv for DIGT3231 course |

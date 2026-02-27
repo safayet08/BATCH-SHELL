@@ -263,6 +263,29 @@ $Payload_CheckDockerDesktop = {
     }
 }
 
+# Check if LibreOffice is installed (install dir + program\soffice.exe with plausible size)
+$Payload_CheckLibreOffice = {
+    $installRoot = "C:\Program Files\LibreOffice"
+    $sofficePath = "$installRoot\program\soffice.exe"
+    $minExeBytes = 500 * 1024   # real soffice.exe is several MB; reject tiny/corrupt stub
+
+    if (-not (Test-Path $installRoot)) {
+        [PSCustomObject]@{ Check = "NOT INSTALLED" }
+        return
+    }
+    if (-not (Test-Path $sofficePath)) {
+        [PSCustomObject]@{ Check = "NOT INSTALLED (folder present, exe missing)" }
+        return
+    }
+    $file = Get-Item $sofficePath
+    if ($file.Length -lt $minExeBytes) {
+        [PSCustomObject]@{ Check = "INCOMPLETE/CORRUPT (exe too small: $([math]::Round($file.Length/1KB,1)) KB)" }
+        return
+    }
+    $version = if ($file.VersionInfo.ProductVersion) { $file.VersionInfo.ProductVersion } else { "unknown" }
+    [PSCustomObject]@{ Check = "INSTALLED - Version: $version" }
+}
+
 # Deploy DIGT2201 VENV - EMBEDDED
 $Payload_DeployDigt2201Venv = {
     # ----------------------------- EXACT NETWORK SCRIPT EMBEDDED -----------------------------
